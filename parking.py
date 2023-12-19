@@ -6,8 +6,8 @@ DATA_FILE = 'parking_data.json'
 
 # Default parking data
 def default_data():
-    initial_occupants = ["Maťa B.", "Adam A.", "Zuzka F.", "Peťa L.", "Tomáš P.", "Tomáš J.", "Roman K.", "Peťo H.", "Eva B."]
-    return [{"id": i, "name": initial_occupants[i-1] if i <= len(initial_occupants) else None} for i in range(1, 11)]
+    # Initialize all spots as None (vacant)
+    return [{"id": i, "name": None} for i in range(1, 13)]
 
 # Read parking data from the file or initialize if file doesn't exist
 def read_data():
@@ -54,17 +54,17 @@ def main():
         spots = read_data()
 
     with st.expander("Check In"):
-        spot_id = st.number_input("Choose a parking spot (1-10) for Check In", min_value=1, max_value=10)
+        spot_id = st.number_input("Choose a parking spot (1-12) for Check In", min_value=1, max_value=12, value=1, step=1)
         name = st.text_input("Enter your name for Check In")
         if st.button("Check In"):
             if check_in(spots, spot_id, name):
                 st.success(f"Checked into parking spot {spot_id}.")
                 save_data(spots)
             else:
-                st.error("Parking spot already taken!")
+                st.error("Parking spot already taken or invalid name!")
 
     with st.expander("Check Out"):
-        spot_id = st.number_input("Choose your parking spot for Check Out", min_value=1, max_value=10)
+        spot_id = st.number_input("Choose your parking spot (1-12) for Check Out", min_value=1, max_value=12, value=1, step=1)
         if st.button("Check Out from chosen spot"):
             if check_out(spots, spot_id):
                 st.success(f"Checked out from parking spot {spot_id}.")
@@ -74,10 +74,8 @@ def main():
 
     st.subheader("Parking Status")
     for spot in spots:
-        occupied = "Vacant"
-        if spot["name"]:
-            occupied = f"Occupied by {spot['name']}"
-        st.write(f"Spot {spot['id']} - {occupied}")
+        status = "Vacant" if spot["name"] is None else f"Occupied by {spot['name']}"
+        st.write(f"Spot {spot['id']} - {status}")
 
 if __name__ == "__main__":
     main()
